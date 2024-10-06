@@ -10,8 +10,11 @@ export default class SampleJob implements IJob {
     this.name = this.constructor.name;
   }
 
-  handle = () => {
+  handle = (job?: Job) => {
     console.log("job handler called");
+    if (job) {
+      console.log(job.data);
+    }
   };
 
   failed = (job?: Job) => {
