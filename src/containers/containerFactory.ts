@@ -14,7 +14,7 @@ async function createContainer(imageName: string, cmdExecutable: string[]) {
     );
     console.log(err);
     await new Promise((resolve, reject) => {
-      docker.pull(imageName, (err: Error, stream: any) => {
+      docker.pull(imageName, (err: Error, stream: NodeJS.ReadableStream) => {
         if (err) {
           console.error(`Failed to pull image ${imageName}:`, err);
           return reject(err);

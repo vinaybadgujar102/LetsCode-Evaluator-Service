@@ -3,7 +3,7 @@ import bodyParser from "body-parser";
 import serverConfig from "./config/server.config";
 import apiRouter from "./routes";
 import SampleWorker from "./workers/sampleWorker";
-import runJava from "./containers/runJavaDocker";
+import runCpp from "./containers/runCppDocker";
 
 const app = express();
 
@@ -19,20 +19,19 @@ app.listen(serverConfig.port, () => {
   SampleWorker("SampleQueue");
 
   const code = `
-  import java.util.*;
-  public class Main {
-    
-    public static void main(String[] args) {
-      Scanner scn = new Scanner(System.in);
-      int n = scn.nextInt();
-      System.out.println(n);
-      for(int i = 0; i < n; i++) {
-        System.out.println(i);
-      }
-    }
+  #include <iostream>
+  using namespace std;
 
+  int main() {
+  int x;
+    cin >> x;
+    cout << x;
+    for(int i=0;i<x;i++) {
+      cout << i;
+      cout << endl;
+      }
   }
   `;
 
-  runJava(code, "10");
+  runCpp(code, "10");
 });
