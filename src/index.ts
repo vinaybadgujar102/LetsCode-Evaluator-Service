@@ -3,7 +3,7 @@ import bodyParser from "body-parser";
 import serverConfig from "./config/server.config";
 import apiRouter from "./routes";
 import SampleWorker from "./workers/sampleWorker";
-import runPython from "./containers/runPythonDocker";
+import runJava from "./containers/runJavaDocker";
 
 const app = express();
 
@@ -18,11 +18,21 @@ app.listen(serverConfig.port, () => {
 
   SampleWorker("SampleQueue");
 
-  const code = `x = input()
-print("value of x is",x)
-for i in range(int(x)):
-  print(i) 
+  const code = `
+  import java.util.*;
+  public class Main {
+    
+    public static void main(String[] args) {
+      Scanner scn = new Scanner(System.in);
+      int n = scn.nextInt();
+      System.out.println(n);
+      for(int i = 0; i < n; i++) {
+        System.out.println(i);
+      }
+    }
+
+  }
   `;
 
-  runPython(code, "10");
+  runJava(code, "10");
 });
