@@ -2,8 +2,8 @@ import express from "express";
 import bodyParser from "body-parser";
 import serverConfig from "./config/server.config";
 import apiRouter from "./routes";
-import sampleQueueProducer from "./producers/sampleQueueProducer";
 import SampleWorker from "./workers/sampleWorker";
+import runPython from "./containers/runPythonDocker";
 
 const app = express();
 
@@ -18,10 +18,11 @@ app.listen(serverConfig.port, () => {
 
   SampleWorker("SampleQueue");
 
-  sampleQueueProducer("SampleJob", {
-    name: "sample",
-    company: "LetsCode",
-    id: 1,
-    data: "sample data",
-  });
+  const code = `x = input()
+print("value of x is",x)
+for i in range(int(x)):
+  print(i) 
+  `;
+
+  runPython(code, "10");
 });
