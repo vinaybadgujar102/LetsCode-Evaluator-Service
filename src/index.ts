@@ -3,7 +3,9 @@ import bodyParser from "body-parser";
 import serverConfig from "./config/server.config";
 import apiRouter from "./routes";
 import SampleWorker from "./workers/sampleWorker";
-import runCpp from "./containers/runCppDocker";
+import SubmissionWorker from "./workers/submissionWorker";
+import { submission_queue } from "./utils/constants";
+import submissionQueueProducer from "./producers/submissionQueueProducer";
 
 const app = express();
 
@@ -17,6 +19,7 @@ app.listen(serverConfig.port, () => {
   console.log(`Server started on port ${serverConfig.port}`);
 
   SampleWorker("SampleQueue");
+  SubmissionWorker(submission_queue);
 
   const code = `
   #include <iostream>
@@ -33,5 +36,13 @@ app.listen(serverConfig.port, () => {
   }
   `;
 
-  runCpp(code, "10");
+  submissionQueueProducer({
+    "1234": {
+      language: "CPP",
+      inputCase: "10",
+      code: code,
+    },
+  });
+
+  // runCpp(code, "10");
 });
