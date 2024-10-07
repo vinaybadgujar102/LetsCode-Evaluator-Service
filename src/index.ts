@@ -3,7 +3,7 @@ import bodyParser from "body-parser";
 import serverConfig from "./config/server.config";
 import apiRouter from "./routes";
 import SampleWorker from "./workers/sampleWorker";
-import runPython from "./dtos/runPythonDocker";
+import runPython from "./containers/runPythonDocker";
 
 const app = express();
 
@@ -18,7 +18,11 @@ app.listen(serverConfig.port, () => {
 
   SampleWorker("SampleQueue");
 
-  const code = `print("Hello, World!")`;
+  const code = `x = input()
+print("value of x is",x)
+for i in range(int(x)):
+  print(i) 
+  `;
 
-  runPython(code);
+  runPython(code, "10");
 });
