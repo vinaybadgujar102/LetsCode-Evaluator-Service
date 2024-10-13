@@ -21,6 +21,7 @@ export default class SubmissionJob implements IJob {
       const codeLanguage = this.payload[key].language;
       const code = this.payload[key].code;
       const inputCase = this.payload[key].inputCase;
+      const outputTestCase = this.payload[key].outputCase;
       //   if (codeLanguage === "CPP") {
       //     const response = await runCpp(
       //       this.payload[key].code,
@@ -33,7 +34,8 @@ export default class SubmissionJob implements IJob {
       if (strategy != null) {
         const response: ExecutionResponse = await strategy.execute(
           code,
-          inputCase
+          inputCase,
+          outputTestCase
         );
 
         if (response.status === "COMPLETED") {

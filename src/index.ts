@@ -21,28 +21,28 @@ app.listen(serverConfig.port, () => {
   SampleWorker("SampleQueue");
   SubmissionWorker(submission_queue);
 
-  const code = `
-  #include <iostream>
-  using namespace std;
+  // const code = `
+  // #include <iostream>
+  // using namespace std;
 
-  int main() {
-  int x;
-    cin >> x;
-    cout << x;
-    for(int i=0;i<x;i++) {
-      cout << i;
-      cout << endl;
-      }
-  }
-  `;
+  // int main() {
+  // int x;
+  //   cin >> x;
+  //   cout << x;
+  //   for(int i=0;i<x;i++) {
+  //     cout << i;
+  //     cout << endl;
+  //     }
+  // }
+  // `;
 
-  submissionQueueProducer({
-    "1234": {
-      language: "CPP",
-      inputCase: "10",
-      code: code,
-    },
-  });
+  // submissionQueueProducer({
+  //   "1234": {
+  //     language: "CPP",
+  //     inputCase: "10",
+  //     code: code,
+  //   },
+  // });
 
   // runCpp(code, "10");
 });

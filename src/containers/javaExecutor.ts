@@ -8,9 +8,13 @@ import { decodeDockerStream } from "./dockerHelper";
 class JavaExecutor implements CodeExecutorStrategy {
   async execute(
     code: string,
-    inputTestCase: string
+    inputTestCase: string,
+    outputTestCase: string
   ): Promise<ExecutionResponse> {
     console.log("Initialising a new java container");
+
+    console.log(code, inputTestCase, outputTestCase);
+
     const rawLogBuffer: Buffer[] = [];
     // const pythonDockerContainer = await createContainer("python:3.8-slim", [
     //   "python",
