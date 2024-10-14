@@ -58,11 +58,22 @@ class JavaExecutor implements CodeExecutorStrategy {
         loggerStream,
         rawLogBuffer
       );
-      return {
-        output: codeResponse,
-        status: "COMPLETED",
-      };
+
+      if (codeResponse.trim() === outputTestCase.trim()) {
+        return {
+          output: codeResponse,
+          status: "COMPLETED",
+        };
+      } else {
+        return {
+          output: codeResponse,
+          status: "WA",
+        };
+      }
     } catch (error) {
+      if (error === "TLE") {
+        await javaDockerContainer.kill();
+      }
       return {
         output: error as string,
         status: "ERROR",
@@ -78,7 +89,13 @@ class JavaExecutor implements CodeExecutorStrategy {
     rawLogBuffer: Buffer[]
   ): Promise<string> {
     return new Promise((res, rej) => {
+      const timeout = setTimeout(() => {
+        console.log("Timed out");
+        rej("TLE");
+      }, 2000);
+
       loggerStream.on("end", () => {
+        clearTimeout(timeout);
         console.log(rawLogBuffer);
         const completeBuffer = Buffer.concat(rawLogBuffer);
         const decodedStream = decodeDockerStream(completeBuffer);
