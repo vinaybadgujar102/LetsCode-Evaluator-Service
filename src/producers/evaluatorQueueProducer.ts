@@ -1,6 +1,6 @@
-import evaluationQueue from "../queues/EvaluationQueue";
+import EvaluationQueue from "../queues/EvaluationQueue";
 
 export default async function (payload: Record<string, unknown>) {
-  await evaluationQueue.add("EvaluationJob", payload);
+  await EvaluationQueue.add("EvaluationJob", payload);
   console.log("Evaluation Job added to queue");
 }

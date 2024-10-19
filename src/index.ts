@@ -5,7 +5,6 @@ import apiRouter from "./routes";
 import SampleWorker from "./workers/sampleWorker";
 import SubmissionWorker from "./workers/submissionWorker";
 import { submission_queue } from "./utils/constants";
-import submissionQueueProducer from "./producers/submissionQueueProducer";
 
 const app = express();
 

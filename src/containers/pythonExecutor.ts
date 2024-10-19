@@ -11,18 +11,10 @@ class PythonExecutor implements CodeExecutorStrategy {
     inputTestCase: string,
     outputTestCase: string
   ): Promise<ExecutionResponse> {
-    console.log("Initialising a new python container");
-
     console.log(code, inputTestCase, outputTestCase);
-
     const rawLogBuffer: Buffer[] = [];
-    // const pythonDockerContainer = await createContainer("python:3.8-slim", [
-    //   "python",
-    //   "-c",
-    //   code,
-    //   "stty -echo",
-    // ]);
 
+    console.log("Initialising a new python docker container");
     const runCommand = `echo '${code.replace(
       /'/g,
       `'\\"`
@@ -30,17 +22,18 @@ class PythonExecutor implements CodeExecutorStrategy {
       /'/g,
       `'\\"`
     )}' | python3 test.py`;
-
+    console.log(runCommand);
+    // const pythonDockerContainer = await createContainer(PYTHON_IMAGE, ['python3', '-c', code, 'stty -echo']);
     const pythonDockerContainer = await createContainer(PYTHON_IMAGE, [
-      "/bin/bash",
+      "/bin/sh",
       "-c",
       runCommand,
     ]);
 
-    // starting the container
+    // starting / booting the corresponding docker container
     await pythonDockerContainer.start();
 
-    console.log("Container started");
+    console.log("Started the docker container");
 
     const loggerStream = await pythonDockerContainer.logs({
       stdout: true,
@@ -49,6 +42,7 @@ class PythonExecutor implements CodeExecutorStrategy {
       follow: true, // whether the logs are streamed or returned as a string
     });
 
+    // Attach events on the stream objects to start and stop reading
     loggerStream.on("data", (chunk) => {
       rawLogBuffer.push(chunk);
     });
@@ -58,18 +52,11 @@ class PythonExecutor implements CodeExecutorStrategy {
         loggerStream,
         rawLogBuffer
       );
-      return {
-        output: codeResponse,
-        status: "COMPLETED",
-      };
+      return { output: codeResponse, status: "COMPLETED" };
     } catch (error) {
-      return {
-        output: error as string,
-        status: "ERROR",
-      };
+      return { output: error as string, status: "ERROR" };
     } finally {
-      // remove the container
-      await pythonDockerContainer.remove({ force: true });
+      await pythonDockerContainer.remove();
     }
   }
 
@@ -77,13 +64,22 @@ class PythonExecutor implements CodeExecutorStrategy {
     loggerStream: NodeJS.ReadableStream,
     rawLogBuffer: Buffer[]
   ): Promise<string> {
+    // TODO: cleanup repisitive fetchDecodedStream
+    // TODO: May be moved to the docker helper util'
+
     return new Promise((res, rej) => {
+      const timeout = setTimeout(() => {
+        console.log("Timeout called");
+        rej("TLE");
+      }, 2000);
       loggerStream.on("end", () => {
+        // This callback executes when the stream ends
+        clearTimeout(timeout);
         console.log(rawLogBuffer);
         const completeBuffer = Buffer.concat(rawLogBuffer);
         const decodedStream = decodeDockerStream(completeBuffer);
-        console.log(decodedStream);
-        console.log(decodedStream.stdout);
+        // console.log(decodedStream);
+        // console.log(decodedStream.stdout);
         if (decodedStream.stderr) {
           rej(decodedStream.stderr);
         } else {

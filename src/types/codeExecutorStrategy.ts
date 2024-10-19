@@ -6,7 +6,4 @@ export default interface CodeExecutorStrategy {
   ): Promise<ExecutionResponse>;
 }
 
-export type ExecutionResponse = {
-  output: string;
-  status: string;
-};
+export type ExecutionResponse = { output: string; status: string };

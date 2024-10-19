@@ -31,8 +31,9 @@ class JavaExecutor implements CodeExecutorStrategy {
       `'\\"`
     )}' | java Main`;
 
+    console.log(runCommand);
     const javaDockerContainer = await createContainer(JAVA_IMAGE, [
-      "/bin/bash",
+      "/bin/sh",
       "-c",
       runCommand,
     ]);
