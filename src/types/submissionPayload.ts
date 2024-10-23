@@ -3,6 +3,6 @@ export type SubmissionPayload = {
   language: string;
   inputCase: string;
   outputCase: string;
-  userId: string;
+  userID: string;
   submissionId: string;
 };

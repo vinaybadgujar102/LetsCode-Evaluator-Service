@@ -32,9 +32,13 @@ export default class SubmissionJob implements IJob {
           outputTestCase
         );
 
+        console.log("response: ", response);
+
+        console.log("userid: ", this.payload[key].userID);
+
         evaluationQueueProducer({
           response,
-          userId: this.payload[key].userId,
+          userID: this.payload[key].userID,
           submissionId: this.payload[key].submissionId,
         });
         if (response.status === "SUCCESS") {

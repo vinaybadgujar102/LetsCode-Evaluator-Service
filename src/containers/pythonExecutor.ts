@@ -1,3 +1,5 @@
+// import Docker from 'dockerode';
+// import { TestCases } from '../types/testCases';
 import CodeExecutorStrategy, {
   ExecutionResponse,
 } from "../types/codeExecutorStrategy";
@@ -11,10 +13,13 @@ class PythonExecutor implements CodeExecutorStrategy {
     inputTestCase: string,
     outputTestCase: string
   ): Promise<ExecutionResponse> {
+    console.log("Python executor called");
     console.log(code, inputTestCase, outputTestCase);
+
     const rawLogBuffer: Buffer[] = [];
 
-    console.log("Initialising a new python docker container");
+    console.log("Initialising a new Python docker container");
+    console.log(`Code received is \n ${code.replace(/'/g, `'\\"`)}`);
     const runCommand = `echo '${code.replace(
       /'/g,
       `'\\"`
@@ -23,7 +28,7 @@ class PythonExecutor implements CodeExecutorStrategy {
       `'\\"`
     )}' | python3 test.py`;
     console.log(runCommand);
-    // const pythonDockerContainer = await createContainer(PYTHON_IMAGE, ['python3', '-c', code, 'stty -echo']);
+
     const pythonDockerContainer = await createContainer(PYTHON_IMAGE, [
       "/bin/sh",
       "-c",
@@ -52,8 +57,18 @@ class PythonExecutor implements CodeExecutorStrategy {
         loggerStream,
         rawLogBuffer
       );
-      return { output: codeResponse, status: "COMPLETED" };
+
+      // Compare output with expected outputTestCase
+      if (codeResponse.trim() === outputTestCase.trim()) {
+        return { output: codeResponse, status: "SUCCESS" };
+      } else {
+        return { output: codeResponse, status: "WA" }; // Wrong Answer
+      }
     } catch (error) {
+      console.log("Error occurred", error);
+      if (error === "TLE") {
+        await pythonDockerContainer.kill();
+      }
       return { output: error as string, status: "ERROR" };
     } finally {
       await pythonDockerContainer.remove();
@@ -64,9 +79,6 @@ class PythonExecutor implements CodeExecutorStrategy {
     loggerStream: NodeJS.ReadableStream,
     rawLogBuffer: Buffer[]
   ): Promise<string> {
-    // TODO: cleanup repisitive fetchDecodedStream
-    // TODO: May be moved to the docker helper util'
-
     return new Promise((res, rej) => {
       const timeout = setTimeout(() => {
         console.log("Timeout called");
@@ -78,8 +90,7 @@ class PythonExecutor implements CodeExecutorStrategy {
         console.log(rawLogBuffer);
         const completeBuffer = Buffer.concat(rawLogBuffer);
         const decodedStream = decodeDockerStream(completeBuffer);
-        // console.log(decodedStream);
-        // console.log(decodedStream.stdout);
+
         if (decodedStream.stderr) {
           rej(decodedStream.stderr);
         } else {
